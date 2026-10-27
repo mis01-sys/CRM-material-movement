@@ -1,0 +1,23 @@
+<div class="page-heading">
+    <div><span class="eyebrow"><%= eyebrow %></span><h1><%= title %></h1><p><%= description %></p></div>
+    <div class="heading-actions">
+        <form class="search-box" method="get"><span aria-hidden="true">⌕</span><input type="search" name="q" value="<%= search %>" placeholder="Search orders…" aria-label="Search orders"></form>
+        <% if (canExport) { %><a class="button button-secondary" href="<%= workspace.base %>/orders/export.xlsx<%= search ? `?q=${encodeURIComponent(search)}` : '' %>" download>Export Excel</a><% } %>
+        <% if (canWrite) { %><a class="button button-primary" href="<%= workspace.base %>/orders/new">＋ Create order</a><% } %>
+    </div>
+</div>
+<div class="table-wrap"><table><thead><tr><th>PO number</th><th>Customer</th><th>Item</th><th>Quantity</th><th>Delivery</th><th>Status</th><th>Production · last update</th><% if (canWrite) { %><th>Actions</th><% } %></tr></thead><tbody>
+    <% data.orders.forEach((order) => { %>
+        <tr><td><span class="table-primary"><%= order.poNo %></span><span class="table-secondary"><%= order.customer?.customerUid || "" %></span></td>
+            <td><span class="table-primary"><%= order.customer?.name || "—" %></span><span class="table-secondary"><%= order.customer?.contactPersonName || "" %></span></td>
+            <td><span class="table-primary"><%= order.item?.partCode || "—" %></span><span class="table-secondary"><%= order.item?.description || "" %></span></td>
+            <td><%= Number(order.qtyPcs).toLocaleString() %> pcs<span class="table-secondary"><%= Number(order.qtyKgs).toLocaleString() %> kg</span></td>
+            <td><%= formatDate(order.deliveryDate) %></td>
+            <td><span class="status-pill<%= order.workflowStatus === 'NEW' ? ' pending' : order.workflowStatus === 'ON_HOLD' ? ' warning' : '' %>"><%= statusLabel(order.workflowStatus) %></span></td>
+            <td><%= order.completedStages %>/<%= order.productionStages.length %> stages<div class="progress-track"><div class="progress-fill" style="width:<%= order.productionStages.length ? Math.round(order.completedStages / order.productionStages.length * 100) : 0 %>%"></div></div>
+                <span class="table-secondary"><%= order.lastExecutiveUpdate ? `${order.lastExecutiveUpdate.stage?.processName || "Stage"} · ${formatDateTime(order.lastExecutiveUpdate.timestamp)} · ${order.lastExecutiveUpdate.createdBy?.username || "Executive"}` : "No executive update" %></span></td>
+            <% if (canWrite) { %><td><div class="table-actions"><a class="text-button" href="<%= workspace.base %>/orders/<%= order._id %>/edit">Edit</a><% if (!order.lastExecutiveUpdate) { %><form action="<%= workspace.base %>/orders/<%= order._id %>/delete" method="post" data-confirm="Delete this order?"><button class="text-button danger" type="submit">Delete</button></form><% } %></div></td><% } %>
+        </tr>
+    <% }) %>
+    <% if (!data.orders.length) { %><tr><td colspan="<%= canWrite ? 8 : 7 %>"><div class="empty-state"><strong>No orders found</strong><p>Create an order or search by PO, customer or part code.</p></div></td></tr><% } %>
+</tbody></table></div>

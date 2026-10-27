@@ -1,0 +1,64 @@
+<div class="page-heading">
+    <div><span class="eyebrow"><%= eyebrow %></span><h1>Operations overview</h1><p><%= description %></p></div>
+</div>
+<div class="metric-grid<%= user.role === 'ADMIN' ? ' metric-grid-admin' : '' %>">
+    <% const metrics = [
+        ["Orders", data.metrics.orderCount, "▤"],
+        ["Upcoming deadlines", data.metrics.upcomingCount, "◷"],
+        ["Customers", data.metrics.customerCount, "♙"],
+        ["Items", data.metrics.itemCount, "▦"],
+        ["Production updates", data.metrics.ledgerCount, "↗"],
+        ...(user.role === "ADMIN" ? [["Team members", data.users.length, "♧"]] : [])
+    ]; %>
+    <% metrics.forEach(([label, value, icon]) => { %>
+        <div class="metric-card"><div class="metric-top"><span><%= label %></span><span class="metric-icon"><%= icon %></span></div><strong class="metric-number"><%= value %></strong></div>
+    <% }) %>
+</div>
+<% if (user.role === "EXECUTIVE") { %>
+    <div class="dashboard-grid">
+        <section class="panel"><div class="panel-head"><h2>Orders needing a production update</h2><a class="text-button" href="<%= workspace.base %>/orders">View orders →</a></div>
+            <div class="panel-body">
+                <% const pending = data.orders.filter((order) => order.workflowStatus !== "COMPLETE" && order.status !== "ON_HOLD"); %>
+                <% if (pending.length) { pending.slice(0, 7).forEach((order) => { %>
+                    <div class="activity-row"><span class="activity-bullet"></span><div class="activity-copy"><strong><%= order.poNo %> · <%= order.customer?.name || "Unknown customer" %></strong><p><%= order.item?.partCode || "—" %> · Delivery <%= formatDate(order.deliveryDate) %></p><small><%= order.completedStages %>/<%= order.productionStages.length %> stages complete</small></div><% if (user.permissions.includes("ledger:write")) { %><a class="button button-primary" href="<%= workspace.base %>/ledger/new">Update</a><% } %></div>
+                <% }) } else { %><div class="empty-state"><strong>No pending updates</strong><p>There are no open orders waiting for production activity.</p></div><% } %>
+            </div>
+        </section>
+        <section class="panel"><div class="panel-head"><h2>Latest production entries</h2></div><div class="panel-body">
+            <% if (data.recentLedger.length) { data.recentLedger.forEach((entry) => { %>
+                <div class="activity-row"><span class="activity-bullet"></span><div class="activity-copy"><strong><%= entry.order?.poNo || "Order" %> · <%= entry.stage?.processName || "Stage" %></strong><p><%= entry.item?.partCode || "—" %> · <%= Number(entry.qtyPcs).toLocaleString() %> pcs · <%= Number(entry.qtyKgs).toLocaleString() %> kg</p><small><%= formatDateTime(entry.timestamp) %></small></div></div>
+            <% }) } else { %><div class="empty-state"><strong>No production entries yet</strong><p>Updates will appear here after they are recorded.</p></div><% } %>
+        </div></section>
+    </div>
+<% } else if (user.role === "CRM") { %>
+    <div class="dashboard-grid">
+        <section class="panel"><div class="panel-head"><h2>Latest orders</h2><a class="text-button" href="<%= workspace.base %>/orders">View all →</a></div><div class="panel-body">
+            <% if (data.orders.length) { data.orders.slice(0, 8).forEach((order) => { %>
+                <div class="activity-row"><span class="activity-bullet"></span><div class="activity-copy"><strong><%= order.poNo %> · <%= order.customer?.name || "Unknown customer" %></strong><p><%= order.item?.partCode || "—" %> · Delivery <%= formatDate(order.deliveryDate) %></p><div class="progress-track"><div class="progress-fill" style="width:<%= order.productionStages.length ? Math.round(order.completedStages / order.productionStages.length * 100) : 0 %>%"></div></div></div><span class="status-pill<%= order.workflowStatus === 'ON_HOLD' ? ' warning' : order.workflowStatus === 'NEW' ? ' pending' : '' %>"><%= statusLabel(order.workflowStatus) %></span></div>
+            <% }) } else { %><div class="empty-state"><strong>No orders</strong><p>Create a customer order to start tracking production.</p></div><% } %>
+        </div></section>
+        <section class="panel"><div class="panel-head"><h2>Upcoming deadlines</h2></div><div class="panel-body">
+            <% const upcoming = data.orders.filter((order) => new Date(order.deliveryDate) >= new Date()).slice(0, 6); %>
+            <% if (upcoming.length) { upcoming.forEach((order) => { %>
+                <div class="activity-row"><span class="activity-bullet"></span><div class="activity-copy"><strong><%= order.poNo %> · <%= order.customer?.name || "Customer" %></strong><p><%= order.item?.partCode || "—" %></p></div><span class="status-pill pending"><%= formatDate(order.deliveryDate) %></span></div>
+            <% }) } else { %><div class="empty-state"><strong>No upcoming deadlines</strong><p>Upcoming delivery dates will appear here.</p></div><% } %>
+        </div></section>
+    </div>
+<% } else { %>
+    <div class="admin-dashboard-grid">
+        <section class="panel"><div class="panel-head"><h2>Team access & last login</h2><a class="text-button" href="<%= workspace.base %>/users">Manage users →</a></div>
+            <div class="table-wrap"><table><thead><tr><th>User</th><th>Role</th><th>Status</th><th>Last login</th></tr></thead><tbody>
+                <% data.users.slice(0, 8).forEach((member) => { %><tr><td><strong><%= member.username %></strong></td><td><%= member.role %></td><td><span class="status-pill<%= member.isActive ? '' : ' pending' %>"><%= member.isActive ? 'Active' : 'Inactive' %></span></td><td><%= formatDateTime(member.lastLoginAt) %></td></tr><% }) %>
+            </tbody></table></div>
+        </section>
+        <section class="panel"><div class="panel-head"><h2>Latest CRM order updates</h2></div><div class="panel-body">
+            <% if (data.crmUpdates.length) { data.crmUpdates.forEach((order) => { %><div class="activity-row"><span class="activity-bullet"></span><div class="activity-copy"><strong><%= order.poNo %> · <%= order.customer?.name || "Customer" %></strong><p>Updated by <%= order.crmUpdatedBy?.username || "CRM" %></p><small><%= formatDateTime(order.crmUpdatedAt) %></small></div></div><% }) } else { %><div class="empty-state"><strong>No CRM updates yet</strong><p>Customer order changes will appear here.</p></div><% } %>
+        </div></section>
+        <section class="panel"><div class="panel-head"><h2>Latest executive production updates</h2><a class="text-button" href="<%= workspace.base %>/ledger">View ledger →</a></div><div class="panel-body">
+            <% if (data.recentLedger.length) { data.recentLedger.forEach((entry) => { %><div class="activity-row"><span class="activity-bullet"></span><div class="activity-copy"><strong><%= entry.order?.poNo || "Order" %> · <%= entry.stage?.processName || "Stage" %></strong><p><%= entry.item?.partCode || "—" %> · <%= entry.createdBy?.username || "Executive" %></p><small><%= formatDateTime(entry.timestamp) %></small></div></div><% }) } else { %><div class="empty-state"><strong>No executive updates yet</strong><p>Production ledger activity will appear here.</p></div><% } %>
+        </div></section>
+        <section class="panel"><div class="panel-head"><h2>Upcoming orders</h2><a class="text-button" href="<%= workspace.base %>/orders">View all →</a></div><div class="panel-body">
+            <% if (data.orders.length) { data.orders.slice(0, 7).forEach((order) => { %><div class="activity-row"><span class="activity-bullet"></span><div class="activity-copy"><strong><%= order.poNo %> · <%= order.customer?.name || "Customer" %></strong><p><%= order.item?.partCode || "—" %> · Delivery <%= formatDate(order.deliveryDate) %></p></div><span class="status-pill<%= order.workflowStatus === 'ON_HOLD' ? ' warning' : '' %>"><%= statusLabel(order.workflowStatus) %></span></div><% }) } else { %><div class="empty-state"><strong>No orders</strong><p>New orders will appear here.</p></div><% } %>
+        </div></section>
+    </div>
+<% } %>

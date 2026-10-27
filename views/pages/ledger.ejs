@@ -1,0 +1,12 @@
+<div class="page-heading">
+    <div><span class="eyebrow"><%= eyebrow %></span><h1><%= title %></h1><p><%= description %></p></div>
+    <div class="heading-actions">
+        <form class="search-box" method="get"><span aria-hidden="true">⌕</span><input type="search" name="q" value="<%= search %>" placeholder="Search ledger…" aria-label="Search ledger"></form>
+        <% if (canExport) { %><a class="button button-secondary" href="<%= workspace.base %>/ledger/export.xlsx<%= search ? `?q=${encodeURIComponent(search)}` : '' %>" download>Export Excel</a><% } %>
+        <% if (canWrite) { %><a class="button button-primary" href="<%= workspace.base %>/ledger/new">＋ Log production</a><% } %>
+    </div>
+</div>
+<div class="table-wrap"><table><thead><tr><th>Timestamp</th><th>Order</th><th>Item</th><th>Stage completed</th><th>Processed quantity</th><th>Updated by</th></tr></thead><tbody>
+    <% data.ledger.forEach((entry) => { %><tr><td><%= formatDateTime(entry.timestamp) %></td><td><strong><%= entry.order?.poNo || "—" %></strong></td><td><%= entry.item?.partCode || "—" %></td><td><span class="status-pill"><%= entry.stage?.processName || "—" %></span></td><td><%= Number(entry.qtyPcs).toLocaleString() %> pcs<span class="table-secondary"><%= Number(entry.qtyKgs).toLocaleString() %> kg</span></td><td><%= entry.createdBy?.username || "—" %></td></tr><% }) %>
+    <% if (!data.ledger.length) { %><tr><td colspan="6"><div class="empty-state"><strong>No production entries</strong><p>Recorded stage completions will appear here.</p></div></td></tr><% } %>
+</tbody></table></div>

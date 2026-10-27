@@ -1,0 +1,10 @@
+<div class="page-heading"><div><span class="eyebrow"><%= eyebrow %></span><h1><%= title %></h1><p><%= description %></p></div></div>
+<section class="panel settings-panel">
+    <div class="panel-head"><h2>Change password</h2></div>
+    <form class="modal-form settings-form" action="/settings/password" method="post">
+        <label>Current password<input name="currentPassword" type="password" autocomplete="current-password" required></label>
+        <label>New password (at least 12 characters)<input name="newPassword" type="password" minlength="12" autocomplete="new-password" required></label>
+        <label>Confirm new password<input name="confirmPassword" type="password" minlength="12" autocomplete="new-password" required></label>
+        <div class="modal-actions"><button class="button button-primary" type="submit">Update password</button></div>
+    </form>
+</section>

@@ -1,0 +1,14 @@
+<div class="page-heading">
+    <div><span class="eyebrow"><%= eyebrow %></span><h1><%= title %></h1><p><%= description %></p></div>
+    <div class="heading-actions">
+        <form class="search-box" method="get"><span aria-hidden="true">⌕</span><input type="search" name="q" value="<%= search %>" placeholder="Search items…" aria-label="Search items"></form>
+        <% if (canExport) { %><a class="button button-secondary" href="<%= workspace.base %>/items/export.xlsx<%= search ? `?q=${encodeURIComponent(search)}` : '' %>" download>Export Excel</a><% } %>
+        <% if (canWrite) { %><a class="button button-primary" href="<%= workspace.base %>/items/new">＋ Add item</a><% } %>
+    </div>
+</div>
+<div class="table-wrap"><table><thead><tr><th>Part code</th><th>Description</th><th>Variant</th><% if (canWrite) { %><th>Actions</th><% } %></tr></thead><tbody>
+    <% data.items.forEach((item) => { %><tr><td><strong><%= item.partCode %></strong></td><td><%= item.description %></td><td><%= item.variant || "—" %></td>
+        <% if (canWrite) { %><td><div class="table-actions"><a class="text-button" href="<%= workspace.base %>/items/<%= item._id %>/edit">Edit</a><form action="<%= workspace.base %>/items/<%= item._id %>/delete" method="post" data-confirm="Delete this item?"><button class="text-button danger" type="submit">Delete</button></form></div></td><% } %>
+    </tr><% }) %>
+    <% if (!data.items.length) { %><tr><td colspan="<%= canWrite ? 4 : 3 %>"><div class="empty-state"><strong>No catalog items found</strong><p>Add an item or try another search.</p></div></td></tr><% } %>
+</tbody></table></div>

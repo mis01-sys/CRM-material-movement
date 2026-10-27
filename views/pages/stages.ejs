@@ -1,0 +1,14 @@
+<div class="page-heading">
+    <div><span class="eyebrow"><%= eyebrow %></span><h1><%= title %></h1><p><%= description %></p></div>
+    <div class="heading-actions">
+        <form class="search-box" method="get"><span aria-hidden="true">⌕</span><input type="search" name="q" value="<%= search %>" placeholder="Search stages…" aria-label="Search stages"></form>
+        <% if (canExport) { %><a class="button button-secondary" href="<%= workspace.base %>/stages/export.xlsx<%= search ? `?q=${encodeURIComponent(search)}` : '' %>" download>Export Excel</a><% } %>
+        <% if (canWrite) { %><a class="button button-primary" href="<%= workspace.base %>/stages/new">＋ Add stage</a><% } %>
+    </div>
+</div>
+<div class="table-wrap"><table><thead><tr><th>Sequence</th><th>Process name</th><% if (canWrite) { %><th>Actions</th><% } %></tr></thead><tbody>
+    <% data.stages.forEach((stage, index) => { %><tr><td><%= String(index + 1).padStart(2, "0") %></td><td><strong><%= stage.processName %></strong></td>
+        <% if (canWrite) { %><td><div class="table-actions"><a class="text-button" href="<%= workspace.base %>/stages/<%= stage._id %>/edit">Edit</a><form action="<%= workspace.base %>/stages/<%= stage._id %>/delete" method="post" data-confirm="Delete this stage?"><button class="text-button danger" type="submit">Delete</button></form></div></td><% } %>
+    </tr><% }) %>
+    <% if (!data.stages.length) { %><tr><td colspan="<%= canWrite ? 3 : 2 %>"><div class="empty-state"><strong>No production stages yet</strong><p>Add stages before creating a production route.</p></div></td></tr><% } %>
+</tbody></table></div>

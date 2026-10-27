@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101c2c">
+    <title>Sign in · AAA Fastener Material Movement Portal</title>
+    <link rel="stylesheet" href="/styles/app.css">
+</head>
+<body class="login-page">
+    <main class="login-layout">
+        <section class="login-story">
+            <div class="brand-lockup"><span class="brand-mark">A</span><span>AAA Fastener<span class="brand-light"> Portal</span></span></div>
+            <div class="story-copy">
+                <span class="eyebrow">AAA FASTENER · MATERIAL MOVEMENT</span>
+                <h1>Every order.<br>Moving forward.</h1>
+                <p>One clear view of customer commitments, production progress and the people moving work along.</p>
+            </div>
+            <div class="story-foot"><span class="status-dot"></span> Production visibility, built for your team</div>
+        </section>
+        <section class="login-panel">
+            <div class="login-card">
+                <span class="eyebrow">WELCOME BACK</span>
+                <h2>Sign in to your workspace</h2>
+                <p class="muted">Use your team account to continue.</p>
+                <form class="stack-form" action="/login" method="post">
+                    <label>Username<input name="username" autocomplete="username" required autofocus placeholder="Your username"></label>
+                    <label>Password<input name="password" type="password" autocomplete="current-password" required placeholder="Your password"></label>
+                    <% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+                    <button class="button button-primary button-wide" type="submit">Sign in <span aria-hidden="true">→</span></button>
+                </form>
+                <p class="login-help">Need access? Ask your administrator to create an account.</p>
+            </div>
+            <div class="login-copyright">AAA Fastener Material Movement Portal <span>·</span> Production & order management</div>
+        </section>
+    </main>
+</body>
+</html>

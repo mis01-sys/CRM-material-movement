@@ -1,0 +1,18 @@
+<div class="page-heading">
+    <div><span class="eyebrow"><%= eyebrow %></span><h1><%= title %></h1><p><%= description %></p></div>
+    <div class="heading-actions">
+        <form class="search-box" method="get"><span aria-hidden="true">⌕</span><input type="search" name="q" value="<%= search %>" placeholder="Search customers…" aria-label="Search customers"></form>
+        <% if (canExport) { %><a class="button button-secondary" href="<%= workspace.base %>/customers/export.xlsx<%= search ? `?q=${encodeURIComponent(search)}` : '' %>" download>Export Excel</a><% } %>
+        <% if (canWrite) { %><a class="button button-primary" href="<%= workspace.base %>/customers/new">＋ Add customer</a><% } %>
+    </div>
+</div>
+<div class="table-wrap"><table><thead><tr><th>Customer</th><th>Contact</th><th>Email</th><th>Address</th><% if (canWrite) { %><th>Actions</th><% } %></tr></thead><tbody>
+    <% data.customers.forEach((customer) => { %>
+        <tr><td><span class="table-primary"><%= customer.customerUid %></span><span class="table-secondary"><%= customer.name %></span></td>
+            <td><span class="table-primary"><%= customer.contactPersonName || "—" %></span><span class="table-secondary"><%= customer.mobile || "" %></span></td>
+            <td><%= customer.email || "—" %></td><td><%= customer.address || "—" %></td>
+            <% if (canWrite) { %><td><div class="table-actions"><a class="text-button" href="<%= workspace.base %>/customers/<%= customer._id %>/edit">Edit</a><form action="<%= workspace.base %>/customers/<%= customer._id %>/delete" method="post" data-confirm="Delete this customer?"><button class="text-button danger" type="submit">Delete</button></form></div></td><% } %>
+        </tr>
+    <% }) %>
+    <% if (!data.customers.length) { %><tr><td colspan="<%= canWrite ? 5 : 4 %>"><div class="empty-state"><strong>No customers found</strong><p>Add a customer or try another search.</p></div></td></tr><% } %>
+</tbody></table></div>

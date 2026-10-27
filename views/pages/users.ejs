@@ -1,0 +1,15 @@
+<div class="page-heading">
+    <div><span class="eyebrow"><%= eyebrow %></span><h1><%= title %></h1><p><%= description %></p></div>
+    <div class="heading-actions">
+        <form class="search-box" method="get"><span aria-hidden="true">⌕</span><input type="search" name="q" value="<%= search %>" placeholder="Search team…" aria-label="Search team"></form>
+        <% if (canExport) { %><a class="button button-secondary" href="<%= workspace.base %>/users/export.xlsx<%= search ? `?q=${encodeURIComponent(search)}` : '' %>" download>Export Excel</a><% } %>
+        <% if (canWrite) { %><a class="button button-primary" href="<%= workspace.base %>/users/new">＋ Add user</a><% } %>
+    </div>
+</div>
+<div class="table-wrap"><table><thead><tr><th>Username</th><th>Role</th><th>Status</th><th>Last login</th><th>Access</th><th>Actions</th></tr></thead><tbody>
+    <% data.users.forEach((member) => { %><tr><td><strong><%= member.username %></strong><% if (String(member._id) === user.id) { %><span class="table-secondary">You</span><% } %></td><td><span class="role-pill"><%= member.role %></span></td>
+        <td><span class="status-pill<%= member.isActive ? '' : ' pending' %>"><%= member.isActive ? "Active" : "Inactive" %></span></td><td><%= formatDateTime(member.lastLoginAt) %></td><td><%= (member.permissions || []).length %> permissions</td>
+        <td><div class="table-actions"><a class="text-button" href="<%= workspace.base %>/users/<%= member._id %>/edit">Edit</a><% if (String(member._id) !== user.id) { %><form action="<%= workspace.base %>/users/<%= member._id %>/delete" method="post" data-confirm="Delete this user? This cannot be undone."><button class="text-button danger" type="submit">Delete</button></form><% } %></div></td>
+    </tr><% }) %>
+    <% if (!data.users.length) { %><tr><td colspan="6"><div class="empty-state"><strong>No team accounts found</strong><p>Create a CRM or executive account to get started.</p></div></td></tr><% } %>
+</tbody></table></div>
